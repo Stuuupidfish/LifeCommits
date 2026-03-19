@@ -7,7 +7,11 @@ namespace LifeCommits
 {
     internal class Grid
     {
-        private Square[,] squares;
+        protected Square[,] squares;
+        public Square[,] Squares 
+        { 
+            get { return squares; } 
+        }
         private DateOnly jan1;
         private int dayOne;
         public Grid()
@@ -45,7 +49,7 @@ namespace LifeCommits
                 }
             }
         }
-        public void addCommit(String desc, DateOnly today)
+        public void AddCommit(String desc, DateOnly today)
         {
             int dayOfWeek = (int)today.DayOfWeek;
             int weekOfYear = (today.DayOfYear - 1 + dayOne) / 7;
@@ -55,7 +59,7 @@ namespace LifeCommits
             //this shouldnt happen as initialize todyas square should always be called before this, but just in case
             if (square == null)
             {
-                initializeTodaysSquare(today);
+                InitializeTodaysSquare(today);
                 square = squares[dayOfWeek, weekOfYear];
             }
 
@@ -66,11 +70,20 @@ namespace LifeCommits
             square.CommitMessageList.Add(desc);
             square.Commits++;
         }
-        public void initializeTodaysSquare(DateOnly today)
+        
+        //call at 12am
+        public void InitializeTodaysSquare(DateOnly today)
         {
             int dayOfWeek = (int)today.DayOfWeek;
             int weekOfYear = (today.DayOfYear - 1 + dayOne) / 7;
             squares[dayOfWeek, weekOfYear] = new Square(today, 0);
+        }
+
+        public Square TodaysSquare(DateOnly today)
+        {
+            int dayOfWeek = (int)today.DayOfWeek;
+            int weekOfYear = (today.DayOfYear - 1 + dayOne) / 7;
+            return squares[dayOfWeek, weekOfYear];
         }
     }
 }
