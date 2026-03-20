@@ -1,13 +1,25 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:LifeCommits.ViewModels"
+        xmlns:views="using:LifeCommits.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="815" d:DesignHeight="150"
         x:Class="LifeCommits.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="LifeCommits">
+        Title="LifeCommits"
+        Width="815" Height="150"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Topmost="True">
+
+    <Window.Styles>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </Window.Styles>
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -15,6 +27,44 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <!-- Wrap everything in a panel like a Grid
+     listen to PointerPressed so you can click and drag the window around-->
+    <Border Background="#75000000" CornerRadius="10" PointerPressed="OnPointerPressed" ClipToBounds="True">
+        <Grid>
+            <!-- ARGB hex: 80 = 50% opacity, 000000 is black -->
+            <views:GridRenderer GridToDraw="{Binding AppManager.OverviewGrid}" 
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top" 
+                                Width="795" 
+                                Height="105"
+                                Margin="10,35,10,10" />
+
+            <!-- current goal/'Overview' -->
+            <TextBlock Text="{Binding CurrentTitle}" 
+                       FontFamily="Monospace"
+                       Foreground="White" 
+                       FontWeight="Bold" 
+                       FontSize="20"
+                       HorizontalAlignment="Left" 
+                       VerticalAlignment="Top" 
+                       Margin="10,5,0,0" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5">
+
+                <Button Content="x" 
+                        FontFamily="Monospace"
+                        FontWeight="Bold"
+                        Click="CloseButton_Click"
+                        Width="20" Height="20"
+                        Padding="0,-2,0,0"
+                        Margin="0,5,5,0"
+                        Background="#80FFFFFF"
+                        Foreground="#80000000"
+                        CornerRadius="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center" />
+            </StackPanel>
+        </Grid>
+    </Border>
 
 </Window>

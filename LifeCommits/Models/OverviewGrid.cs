@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System;
 
-namespace LifeCommits
+namespace LifeCommits.Models
 {
-    internal sealed class OverviewGrid : Grid
+    public sealed class OverviewGrid : Grid
     {
         private List<Goal> goals;
 

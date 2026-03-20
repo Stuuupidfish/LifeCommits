@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LifeCommits
+namespace LifeCommits.Models
 {
-    internal class Goal
+    public class Goal
     {
         //goals hold grids. one grid per year.
         //grids are 7 rows (sun-sat) and 53 columns (weeks in a year-- rounded accounting for leap year)
@@ -66,6 +66,11 @@ namespace LifeCommits
             yearsList.Add(newYear.ToString());
             years.Add(new Grid());
             currentYearInd++;
+        }
+
+        public void SwitchYearView(int dir)
+        {
+
         }
 
         //call this at 11:59pm every day

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LifeCommits
+namespace LifeCommits.Models
 {
-    internal class Square
+    public class Square
     {
         private DateOnly? date;
         public DateOnly? Date

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LifeCommits
+namespace LifeCommits.Models
 {
-    internal class Manager
+    public sealed class Manager
     {
         private List<Goal> goals;
         public List<Goal> Goals 
@@ -20,7 +20,7 @@ namespace LifeCommits
         public Manager()
         {
             goals = new List<Goal>();
-            overviewGrid = new OverviewGrid(goals, DateTime.Now.Year);
+            overviewGrid = new OverviewGrid(goals);
         }
 
         public void AddGoal(String name, String color)
@@ -35,7 +35,7 @@ namespace LifeCommits
 
         public void ResetOverviewGridForYear(int year)
         {
-            overviewGrid = new OverviewGrid(goals, year);
+            overviewGrid = new OverviewGrid(goals);
         }
 
     }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace LifeCommits
+namespace LifeCommits.Models
 {
-    internal class Grid
+    public class Grid
     {
         protected Square[,] squares;
         public Square[,] Squares 
