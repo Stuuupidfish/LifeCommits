@@ -19,6 +19,13 @@ namespace LifeCommits.Views
         {
             Close();
         }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            //i dont think this is right....
+            //FIX LATER
+            Hide();
+        }
         private void OnPointerPressed(object sender, PointerPressedEventArgs e)
         {
             BeginMoveDrag(e);

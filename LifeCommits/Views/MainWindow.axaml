@@ -4,12 +4,12 @@
         xmlns:views="using:LifeCommits.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="815" d:DesignHeight="150"
+        mc:Ignorable="d" d:DesignWidth="853" d:DesignHeight="300"
         x:Class="LifeCommits.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="LifeCommits"
-        Width="815" Height="150"
+        Width="853" Height="300"
         SystemDecorations="None"
         Background="Transparent"
         TransparencyLevelHint="Transparent"
@@ -27,44 +27,157 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <!-- Wrap everything in a panel like a Grid
-     listen to PointerPressed so you can click and drag the window around-->
-    <Border Background="#75000000" CornerRadius="10" PointerPressed="OnPointerPressed" ClipToBounds="True">
-        <Grid>
-            <!-- ARGB hex: 80 = 50% opacity, 000000 is black -->
-            <views:GridRenderer GridToDraw="{Binding AppManager.OverviewGrid}" 
-                                HorizontalAlignment="Left" 
-                                VerticalAlignment="Top" 
-                                Width="795" 
-                                Height="105"
-                                Margin="10,35,10,10" />
+    <Canvas>
+        
 
-            <!-- current goal/'Overview' -->
-            <TextBlock Text="{Binding CurrentTitle}" 
-                       FontFamily="Monospace"
-                       Foreground="White" 
-                       FontWeight="Bold" 
-                       FontSize="20"
-                       HorizontalAlignment="Left" 
-                       VerticalAlignment="Top" 
-                       Margin="10,5,0,0" />
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5">
+        <Button Background="#75000000" CornerRadius="10" ClipToBounds="True"
+                Width="25" Height="150" Canvas.Left="0" Canvas.Top="150">
+            <TextBlock Text="&lt;" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
 
-                <Button Content="x" 
+        
+        <Button Background="#75000000" CornerRadius="10" ClipToBounds="True"
+                Width="25" Height="150" Canvas.Right="0" Canvas.Top="150">
+            <TextBlock Text="&gt;" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
+
+        <!-- Toggleable Panel -->
+        <Border Background="#75000000" CornerRadius="10" ClipToBounds="True"
+                Width="150" Height="130" Canvas.Right = "35" Canvas.Top="15"
+                HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <!--IsVisible="{Binding IsPanelVisible}">-->
+            <StackPanel Margin="10">
+                <TextBlock Text="Goal:" 
+                           FontFamily="Monospace"
+                           Foreground="White" 
+                           FontWeight="Bold" 
+                           Margin="5,0,0,5"/>
+                <TextBox Width="120" Height="30" BorderThickness="0"/>
+                
+                <!-- color buttons -->
+                <StackPanel Margin="7" Orientation="Horizontal">
+					<Button
+                    Width="12" Height = "12"
+                    Background="#FF352E"
+                    Margin="2"/>
+                    
+                    <Button
+                        Width="12" Height = "12"
+                        Background="#FF9D00"
+                        Margin="2"/>
+
+                    <Button
+                        Width="12" Height = "12"
+                        Background="#FFE72E"
+                        Margin="2"/>
+
+                    <Button
+                        Width="12" Height = "12"
+                        Background="#6DDB24"
+                        Margin="2"/>
+
+                    <Button
+                        Width="12" Height = "12"
+                        Background="#4BABE2"
+                        Margin="2"/>
+
+                    <Button
+                        Width="12" Height = "12"
+                        Background="#8F24DB"
+                        Margin="2"/>
+
+                    <Button
+                        Width="12" Height = "12"
+                        Background="#DB24DB"
+                        Margin="2"/>
+                </StackPanel>
+
+                <!-- submit new goal-->
+                <Button
+                    Width="120" Height = "24"
+					Content="Create" 
+                    FontFamily="Monospace"
+                    FontWeight="Bold"
+                    Click=""
+                    Padding="0,-2,0,0"
+                    Margin="5,0,0,0"
+                    Background="#80FFFFFF"
+                    Foreground="#80000000"
+                    CornerRadius="5"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center" 
+                />
+              
+            </StackPanel>
+        </Border>
+		
+        <Border Background="#75000000" CornerRadius="10" PointerPressed="OnPointerPressed" ClipToBounds="True"
+                Width="795" Height="150" Canvas.Left="29" Canvas.Top="150">
+            <Grid>
+                <!-- ARGB hex: 80 = 50% opacity, 000000 is black -->
+                <views:GridRenderer GridToDraw="{Binding AppManager.OverviewGrid}" 
+                                    HorizontalAlignment="Center" 
+                                    VerticalAlignment="Bottom" 
+                                    Width="795" 
+                                    Height="100"
+                                    Margin="30,35,10,10" />
+
+                <!-- current goal/'Overview' -->
+                <TextBlock Text="{Binding CurrentTitle}" 
+                           FontFamily="Monospace"
+                           Foreground="White" 
+                           FontWeight="Bold" 
+                           FontSize="20"
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Top" 
+                           Margin="10,5,0,0" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5">
+                    <!--new goal-->
+                    <Button 
+                        Content="New Goal" 
                         FontFamily="Monospace"
                         FontWeight="Bold"
                         Click="CloseButton_Click"
-                        Width="20" Height="20"
-                        Padding="0,-2,0,0"
+                        Width="80" Height="20"
+                        Padding="0,-1,0,0"
                         Margin="0,5,5,0"
                         Background="#80FFFFFF"
                         Foreground="#80000000"
                         CornerRadius="5"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center" />
-            </StackPanel>
-        </Grid>
-    </Border>
+                    <!--minimize- NEEDS FIXING-->
+                    <Button Content="&#8211;" 
+                            FontFamily="Monospace"
+                            FontWeight="Bold"
+                            Click="MinimizeButton_Click"
+                            Width="20" Height="20"
+                            Padding="0,-2,0,0"
+                            Margin="0,5,5,0"
+                            Background="#80FFFFFF"
+                            Foreground="#80000000"
+                            CornerRadius="5"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center" />
+                    <!--close-->
+                    <Button Content="x" 
+                            FontFamily="Monospace"
+                            FontWeight="Bold"
+                            Click="CloseButton_Click"
+                            Width="20" Height="20"
+                            Padding="0,-2,0,0"
+                            Margin="0,5,5,0"
+                            Background="#80FFFFFF"
+                            Foreground="#80000000"
+                            CornerRadius="5"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center" />
+                 
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Canvas>
 
 </Window>
