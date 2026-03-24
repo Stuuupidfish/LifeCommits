@@ -17,14 +17,19 @@ namespace LifeCommits.Views
 
         public Grid GridToDraw
         {
-            get => GetValue(GridToDrawProperty);
-            set => SetValue(GridToDrawProperty, value);
+            get { return (Grid)GetValue(GridToDrawProperty); }
+            set { SetValue(GridToDrawProperty, value); }
         }
 
         static GridRenderer()
         {
             //whenever Grid changes, tell control to redraw
-            GridToDrawProperty.Changed.AddClassHandler<GridRenderer>((x, e) => x.InvalidateVisual());
+            GridToDrawProperty.Changed.AddClassHandler<GridRenderer>(OnGridToDrawChanged);
+        }
+
+        private static void OnGridToDrawChanged(GridRenderer sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            sender.InvalidateVisual();
         }
 
         private readonly List<int>[] colors = new List<int>[7];

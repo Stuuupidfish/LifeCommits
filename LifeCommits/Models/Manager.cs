@@ -20,7 +20,7 @@ namespace LifeCommits.Models
         public Manager()
         {
             goals = new List<Goal>();
-            overviewGrid = new OverviewGrid(goals);
+            overviewGrid = new OverviewGrid(goals, DateTime.Now.Year);
         }
 
         public void AddGoal(String name, String color)
@@ -35,7 +35,7 @@ namespace LifeCommits.Models
 
         public void ResetOverviewGridForYear(int year)
         {
-            overviewGrid = new OverviewGrid(goals);
+            overviewGrid = new OverviewGrid(goals, year);
         }
 
     }

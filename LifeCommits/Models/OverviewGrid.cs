@@ -7,10 +7,10 @@ namespace LifeCommits.Models
     {
         private List<Goal> goals;
 
-        public OverviewGrid(List<Goal> goals) : base()
+        //now accepts a year so overview can be built for a specific year
+        public OverviewGrid(List<Goal> goals, int year) : base()
         {
             this.goals = goals;
-            int year = DateTime.Now.Year;
             foreach (Goal goal in goals)
             {
                 Grid thisYear = goal.GetYearGrid(year.ToString());
