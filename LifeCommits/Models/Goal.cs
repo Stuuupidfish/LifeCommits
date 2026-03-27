@@ -43,7 +43,25 @@ namespace LifeCommits.Models
             yearsList = new List<String>();
 
             yearsList.Add(DateTime.Now.Year.ToString());
-            years.Add(new Grid());
+            var grid = new Grid();
+            grid.ColorKey = ColorNameToIndex(color);
+            years.Add(grid);
+        }
+
+        private int ColorNameToIndex(string color)
+        {
+            //maps color names to palette index (MainWindowViewModel)
+            switch (color)
+            {
+                case "Red": return 0;
+                case "Orange": return 1;
+                case "Yellow": return 2;
+                case "Green": return 3;
+                case "Blue": return 4;
+                case "Indigo": return 5;
+                case "Violet": return 6;
+                default: return -1;
+            }
         }
         public void Contribute(String desc)
         {
@@ -59,6 +77,14 @@ namespace LifeCommits.Models
             return years[yearInd];
         }
 
+        public IReadOnlyList<string> YearsList
+        {
+            get
+            {
+                return yearsList.AsReadOnly();
+            }
+        }
+
         //call this at the start of year
         public void AddYear()
         {
@@ -66,11 +92,6 @@ namespace LifeCommits.Models
             yearsList.Add(newYear.ToString());
             years.Add(new Grid());
             currentYearInd++;
-        }
-
-        public void SwitchYearView(int dir)
-        {
-
         }
 
         //call this at 11:59pm every day

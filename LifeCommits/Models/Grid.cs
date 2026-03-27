@@ -12,6 +12,13 @@ namespace LifeCommits.Models
         { 
             get { return squares; } 
         }
+        // ColorKey is an int index for color palette (0-6), default -1 for fallback
+        private int colorKey = -1;
+        public int ColorKey
+        {
+            get { return colorKey; }
+            set { colorKey = value; }
+        }
         private DateOnly jan1;
         private int dayOne;
         public Grid()

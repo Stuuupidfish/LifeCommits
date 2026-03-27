@@ -31,14 +31,124 @@ namespace LifeCommits.ViewModels
                 }
             }
         }
+
+        // index of the currently selected goal in AppManager.Goals
+        // -1 indicates the overview is selected
+        private int currentGoalIndex = -1;
+
+        public void SelectGoalByIndex(int index)
+        {
+            if (index < -1)
+            {
+                return;
+            }
+
+            if (index >= AppManager.Goals.Count)
+            {
+                return;
+            }
+
+            currentGoalIndex = index;
+
+            // Update contribute button visibility: only visible if not on overview
+            IsContributeButtonVisible = (currentGoalIndex != -1);
+
+            if (currentGoalIndex == -1)
+            {
+                CurrentTitle = "Overview";
+                SelectedGrid = AppManager.OverviewGrid;
+                return;
+            }
+
+            Goal goal = AppManager.Goals[currentGoalIndex];
+            CurrentTitle = goal.Name;
+            SelectedGrid = goal.GetYearGrid(SelectedYear.ToString());
+        }
+
+        public void SelectNextGoal()
+        {
+            if (AppManager.Goals.Count == 0)
+            {
+                return;
+            }
+
+            if (currentGoalIndex == -1)
+            {
+                // move from overview to first goal
+                SelectGoalByIndex(0);
+                return;
+            }
+
+            if (currentGoalIndex < AppManager.Goals.Count - 1)
+            {
+                SelectGoalByIndex(currentGoalIndex + 1);
+                return;
+            }
+
+            // Update contribute button visibility in case nothing changed
+            IsContributeButtonVisible = (currentGoalIndex != -1);
+        }
+
+        public void SelectPreviousGoal()
+        {
+            if (AppManager.Goals.Count == 0)
+            {
+                return;
+            }
+
+            if (currentGoalIndex == -1)
+            {
+                // already at overview
+                IsContributeButtonVisible = false;
+                return;
+            }
+
+            if (currentGoalIndex > 0)
+            {
+                SelectGoalByIndex(currentGoalIndex - 1);
+                return;
+            }
+
+            if (currentGoalIndex == 0)
+            {
+                // move back to overview
+                SelectGoalByIndex(-1);
+                return;
+            }
+
+            // Update contribute button visibility in case nothing changed
+            IsContributeButtonVisible = (currentGoalIndex != -1);
+        }
         public IReadOnlyList<int> Years
         {
             get
             {
                 if (AppManager.Goals.Count > 0)
                 {
-                    int current = DateTime.Now.Year;
-                    return new List<int> { current - 2, current - 1, current }; //first 3 years-- CHANGE LATER
+                    HashSet<int> yearsSet = new HashSet<int>();
+                    for (int i = 0; i < AppManager.Goals.Count; i++)
+                    {
+                        Goal g = AppManager.Goals[i];
+                        IReadOnlyList<string> yl = g.YearsList;
+                        for (int j = 0; j < yl.Count; j++)
+                        {
+                            string ys = yl[j];
+                            int yi;
+                            if (int.TryParse(ys, out yi))
+                            {
+                                yearsSet.Add(yi);
+                            }
+                        }
+                    }
+
+                    if (yearsSet.Count == 0)
+                    {
+                        return new List<int> { DateTime.Now.Year };
+                    }
+
+                    List<int> list = new List<int>(yearsSet);
+                    list.Sort();
+                    return list;
                 }
                 else
                 {
@@ -91,6 +201,28 @@ namespace LifeCommits.ViewModels
             }
         }
         #endregion
+
+        private bool isContributeButtonVisible = false;
+        public bool IsContributeButtonVisible
+        {
+            get { return isContributeButtonVisible; }
+            set
+            {                
+                isContributeButtonVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool isContributePanelVisible = false;
+        public bool IsContributePanelVisible
+        {
+            get { return isContributePanelVisible; }
+            set
+            {
+                isContributePanelVisible = value;
+                OnPropertyChanged();
+            }
+        }
 
         #region time
         private DateOnly currentDate;
@@ -145,8 +277,27 @@ namespace LifeCommits.ViewModels
         public void MakeNewGoal(string goalName, int colorInd) // You can add a color parameter here later!
         {
             string color = names[colorInd];
-            var newGoal = new Goal(goalName, color);
-            AppManager.Goals.Add(newGoal);
+            // Ask the manager to create and register the new goal. Manager will
+            // insert it as the primary goal so the UI shows it by default.
+            AppManager.AddGoal(goalName, color);
+
+            // The manager added the new goal at the end of the list — select it.
+            SelectGoalByIndex(AppManager.Goals.Count - 1);
+
+            // Ensure selected year is current and notify that Years may have changed.
+            SelectedYear = DateTime.Now.Year;
+            OnPropertyChanged(nameof(Years));
+        }
+
+        public void MakeNewContribution(string contributionNotes)
+        {
+            Goal goal = AppManager.Goals[currentGoalIndex];
+            goal.Contribute(contributionNotes);
+            // Update overview grid for today
+            AppManager.OverviewGrid.UpdateToday(DateOnly.FromDateTime(DateTime.Now));
+            OnPropertyChanged(nameof(SelectedGrid));
+            OnPropertyChanged(nameof(AppManager));
+            OnPropertyChanged(nameof(AppManager.OverviewGrid));
         }
 
         private void UpdateSelectedGridForYear(int year)

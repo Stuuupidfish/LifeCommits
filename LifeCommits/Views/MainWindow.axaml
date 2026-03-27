@@ -32,39 +32,75 @@
         
         <!--left-->
         <Button Background="#75000000" CornerRadius="10" ClipToBounds="True"
-                Width="25" Height="150" Canvas.Left="0" Canvas.Top="135">
+                Width="25" Height="150" Canvas.Left="0" Canvas.Top="135"
+                Click="GoalPrev_Click">
             <TextBlock Text="&lt;" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Button>
 
         <!--right-->
         <Button Background="#75000000" CornerRadius="10" ClipToBounds="True"
-                Width="25" Height="150" Canvas.Right="0" Canvas.Top="135">
+                Width="25" Height="150" Canvas.Right="0" Canvas.Top="135"
+                Click="GoalNext_Click">
             <TextBlock Text="&gt;" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Button>
 
         <!-- small year toggle buttons beside year selector -->
         <Button Background="#75000000" CornerRadius="5" ClipToBounds="True"
-                Width="20" Height="20" Canvas.Left="4" Canvas.Top="92"
-                Click="YearPrev_Click">
-            <TextBlock Text="-" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                Width="20" Height="30" Canvas.Left="27" Canvas.Top="100"
+                Click="YearPrev_Click"
+                Content="-" Padding="5" Foreground="White">
         </Button>
         <Button Background="#75000000" CornerRadius="5" ClipToBounds="True"
-                Width="20" Height="20" Canvas.Left="105" Canvas.Top="92"
-                Click="YearNext_Click">
-            <TextBlock Text="+" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                Width="20" Height="30" Canvas.Left="133" Canvas.Top="100"
+                Click="YearNext_Click"
+                Content="+" Padding="4" Foreground="White">
         </Button>
 
-        <!-- year selector-->
-        <ListBox ItemsSource="{Binding Years}" 
-                 SelectedItem="{Binding SelectedYear, Mode=TwoWay}"
-                 Width="80" Height="30" 
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 Background="#75000000" CornerRadius="10" ClipToBounds="True"
-                 Canvas.Left="19" Canvas.Top="90"
-                 />
+        <!-- year display (show only current selected year) -->
+        <Border Width="80" Height="30"
+                Canvas.Left="50" Canvas.Top="100"
+                Background="#75000000" CornerRadius="5" ClipToBounds="True">
+            <TextBlock Text="{Binding SelectedYear}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       FontFamily="Monospace"
+                       FontWeight="Bold"
+                       Foreground="White" />
+        </Border>
 
-        <!-- Toggleable Panel -->
+        <!--Togglable Contribution panel-->
+        <Border Background="#75000000" CornerRadius="10" ClipToBounds="True"
+                Width="150" Height="130" Canvas.Right="190" Canvas.Top="0"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                IsVisible="{Binding IsContributePanelVisible}">
+            <StackPanel Margin="10">
+				 <TextBlock Text="Notes:" 
+                           FontFamily="Monospace"
+                           Foreground="White" 
+                           FontWeight="Bold" 
+                           Margin="5,0,0,5"/>
+                <TextBox x:Name="ContributeTextBox" Width="120" Height="55" BorderThickness="0"/>
+                <!-- Contribute -->
+                <Button
+                    Width="120" Height = "24"
+                    Content="Contribute" 
+                    FontFamily="Monospace"
+                    FontWeight="Bold"
+                    Click="ConfirmNewContribution_Click"
+                    Padding="0,0,0,0"
+                    Margin="5,5,0,0"
+                    Background="#80FFFFFF"
+                    Foreground="#80000000"
+                    CornerRadius="5"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center" 
+                />
+            </StackPanel>
+			
+        </Border>
+
+        <!-- Toggleable Goal Panel -->
         <Border Background="#75000000" CornerRadius="10" ClipToBounds="True"
                 Width="150" Height="130" Canvas.Right="30" Canvas.Top="0"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -157,7 +193,7 @@
 
             <Grid>
                 <!--grid squares -->
-                <views:GridRenderer GridToDraw="{Binding SelectedGrid}" 
+                <views:GridRenderer x:Name="GridRenderer" GridToDraw="{Binding SelectedGrid}" 
                                     HorizontalAlignment="Center" 
                                     VerticalAlignment="Bottom" 
                                     Width="795" 
@@ -175,16 +211,31 @@
                            Margin="10,5,0,0" />
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5">
+                    <!--contribute-->
+                    <Button 
+                        IsVisible="{Binding IsContributeButtonVisible}"
+                        Content="Contribute" 
+                        FontFamily="Monospace"
+                        FontWeight="Bold"
+                        Click="ShowContributePanel_Click"
+                        Width="100" Height="20"
+                        Padding="0,-1,0,0"
+                        Margin="0,5,5,0"
+                        Background="#90FFFFFF"
+                        Foreground="#80000000"
+                        CornerRadius="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center" />
                     <!--new goal-->
                     <Button 
                         Content="New Goal" 
                         FontFamily="Monospace"
                         FontWeight="Bold"
                         Click="ShowNewGoalPanel_Click"
-                        Width="80" Height="20"
+                        Width="90" Height="20"
                         Padding="0,-1,0,0"
                         Margin="0,5,5,0"
-                        Background="#80FFFFFF"
+                        Background="#90FFFFFF"
                         Foreground="#80000000"
                         CornerRadius="5"
                         HorizontalContentAlignment="Center"
@@ -197,7 +248,7 @@
                             Width="20" Height="20"
                             Padding="0,-2,0,0"
                             Margin="0,5,5,0"
-                            Background="#80FFFFFF"
+                            Background="#90FFFFFF"
                             Foreground="#80000000"
                             CornerRadius="5"
                             HorizontalContentAlignment="Center"
@@ -210,7 +261,7 @@
                             Width="20" Height="20"
                             Padding="0,-2,0,0"
                             Margin="0,5,5,0"
-                            Background="#80FFFFFF"
+                            Background="#90FFFFFF"
                             Foreground="#80000000"
                             CornerRadius="5"
                             HorizontalContentAlignment="Center"

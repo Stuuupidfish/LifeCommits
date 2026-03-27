@@ -50,13 +50,17 @@ namespace LifeCommits.Views
         {
             base.Render(context);
 
-            // If we don't have a Grid to draw yet, nothing to draw
             if (GridToDraw == null) return;
 
-            double size = 12;    // Size of the square
-            double spacing = 3;  // Padding between squares
+            double size = 12;
+            double spacing = 3;
 
-            // 7 rows (days), 53 columns (weeks)
+            // Determine color palette index
+            int paletteIdx = GridToDraw.ColorKey;
+            if (paletteIdx < 0 || paletteIdx >= colors.Length)
+                paletteIdx = 3; // fallback to green
+            var palette = colors[paletteIdx];
+
             for (int c = 0; c < 53; c++)
             {
                 for (int r = 0; r < 7; r++)
@@ -77,13 +81,18 @@ namespace LifeCommits.Views
                     {
                         color = new SolidColorBrush(Color.Parse("#ebedf0"));
                     }
-                    else if (square.Commits < 3)
-                    {
-                        color = new SolidColorBrush(Color.Parse("#9be9a8"));
-                    }
                     else
                     {
-                        color = new SolidColorBrush(Color.Parse("#216e39"));
+                        // Use palette: 1 commit = lightest, 2 = next, 3+ = darkest
+                        int idx = 0;
+                        if (square.Commits >= 3) idx = 3;
+                        else if (square.Commits == 2) idx = 2;
+                        else if (square.Commits == 1) idx = 1;
+                        int rgb = palette[Math.Min(idx, palette.Count - 1)];
+                        color = new SolidColorBrush(Color.FromArgb(0xFF,
+                            (byte)((rgb >> 16) & 0xFF),
+                            (byte)((rgb >> 8) & 0xFF),
+                            (byte)(rgb & 0xFF)));
                     }
 
                     context.DrawRectangle(color, null, rect);

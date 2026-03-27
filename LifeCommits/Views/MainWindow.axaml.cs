@@ -7,6 +7,7 @@ using Avalonia.Platform;
 using Avalonia.Media;
 using LifeCommits.ViewModels;
 using System;
+using System.Linq;
 
 namespace LifeCommits.Views
 {
@@ -19,6 +20,22 @@ namespace LifeCommits.Views
             DataContext = new MainWindowViewModel();
             // ensure window is placed at bottom of z-order when opened (Windows only)
             this.Opened += MainWindow_Opened;
+        }
+
+        private void GoalPrev_Click(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                viewModel.SelectPreviousGoal();
+            }
+        }
+
+        private void GoalNext_Click(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                viewModel.SelectNextGoal();
+            }
         }
 
         private void MainWindow_Opened(object? sender, EventArgs e)
@@ -35,11 +52,44 @@ namespace LifeCommits.Views
             }
         }
 
+        private void ShowContributePanel_Click(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                // toggle visibility so repeated clicks show/hide the panel
+                viewModel.IsContributePanelVisible = !viewModel.IsContributePanelVisible;
+            }
+        }
+
         private void YearPrev_Click(object? sender, RoutedEventArgs e)
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                viewModel.SelectedYear = viewModel.SelectedYear - 1;
+                int[] years = viewModel.Years.ToArray();
+                if (years == null || years.Length == 0)
+                {
+                    return;
+                }
+
+                int best = int.MinValue;
+                bool found = false;
+                for (int i = 0; i < years.Length; i++)
+                {
+                    int y = years[i];
+                    if (y < viewModel.SelectedYear)
+                    {
+                        if (!found || y > best)
+                        {
+                            best = y;
+                            found = true;
+                        }
+                    }
+                }
+
+                if (found)
+                {
+                    viewModel.SelectedYear = best;
+                }
             }
         }
 
@@ -47,7 +97,31 @@ namespace LifeCommits.Views
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                viewModel.SelectedYear = viewModel.SelectedYear + 1;
+                int[] years = viewModel.Years.ToArray();
+                if (years == null || years.Length == 0)
+                {
+                    return;
+                }
+
+                int best = int.MaxValue;
+                bool found = false;
+                for (int i = 0; i < years.Length; i++)
+                {
+                    int y = years[i];
+                    if (y > viewModel.SelectedYear)
+                    {
+                        if (!found || y < best)
+                        {
+                            best = y;
+                            found = true;
+                        }
+                    }
+                }
+
+                if (found)
+                {
+                    viewModel.SelectedYear = best;
+                }
             }
         }
 
@@ -109,16 +183,35 @@ namespace LifeCommits.Views
             }
         }
 
-        private void NewGoalButton_Click(object sender, RoutedEventArgs e)
+        private void ConfirmNewContribution_Click(object sender, RoutedEventArgs e)
         {
-            //GoalPopup.IsOpen = true;
+            var tb = this.FindControl<TextBox>("ContributeTextBox");
+            var notes = tb?.Text?.Trim();
+
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                //no notes contributions should be ok-- notes shouodl be optional
+                viewModel.MakeNewContribution(notes);
+                viewModel.IsContributePanelVisible = false;
+            }
+
+            //force grid redraw
+            var gridRenderer = this.FindControl<Control>("GridRenderer");
+            gridRenderer?.InvalidateVisual();
+
+            if (tb != null)
+            {
+                tb.Text = string.Empty;
+            }
         }
         private void ConfirmNewGoal_Click(object? sender, RoutedEventArgs e)
         {
             var tb = this.FindControl<TextBox>("NewGoalTextBox");
             var name = tb?.Text?.Trim();
             if (string.IsNullOrEmpty(name))
+            {
                 return;
+            }
 
             if (DataContext is MainWindowViewModel viewModel)
             {
@@ -127,7 +220,9 @@ namespace LifeCommits.Views
             }
 
             if (tb != null)
+            {
                 tb.Text = string.Empty;
+            }
         }
 
         // put main window at bottom (Windows only)
