@@ -16,10 +16,62 @@ namespace LifeCommits.Views
         public MainWindow()
         {
             InitializeComponent();
-
             DataContext = new MainWindowViewModel();
+            // subscribe to square click events from the renderer to show commit notes
+            GridRenderer gridRenderer = this.FindControl<GridRenderer>("GridRenderer");
+            if (gridRenderer != null)
+            {
+                gridRenderer.SquareClicked += GridRenderer_SquareClicked;
+            }
             // ensure window is placed at bottom of z-order when opened (Windows only)
             this.Opened += MainWindow_Opened;
+        }
+
+        private void GridRenderer_SquareClicked(object? sender, GridRenderer.SquareClickedEventArgs e)
+        {
+            Border popup = this.FindControl<Border>("MessagesPopup");
+            StackPanel panel = this.FindControl<StackPanel>("MessagesPanel");
+            if (popup == null || panel == null)
+            {
+                return;
+            }
+
+            // clear existing
+            panel.Children.Clear();
+
+            if (e.Messages == null || e.Messages.Count == 0)
+            {
+                popup.IsVisible = false;
+                return;
+            }
+
+            foreach (string msg in e.Messages)
+            {
+                TextBlock tb = new TextBlock();
+                tb.Text = "• " + msg;
+                tb.Foreground = Brushes.White;
+                tb.FontFamily = new FontFamily("Monospace");
+                tb.Margin = new Thickness(0, 0, 0, 4);
+                panel.Children.Add(tb);
+            }
+
+            double x = e.Position.X + 10.0;
+            double y = e.Position.Y + 10.0;
+            // clamp to window
+            double maxX = this.Bounds.Width - popup.Width - 4.0;
+            double maxY = this.Bounds.Height - popup.Height - 4.0;
+            if (x > maxX)
+            {
+                x = Math.Max(0.0, maxX);
+            }
+            if (y > maxY)
+            {
+                y = Math.Max(0.0, maxY);
+            }
+
+            Canvas.SetLeft(popup, x);
+            Canvas.SetTop(popup, y);
+            popup.IsVisible = true;
         }
 
         private void GoalPrev_Click(object? sender, RoutedEventArgs e)
@@ -151,7 +203,7 @@ namespace LifeCommits.Views
             if (sender is Button btn)
             {
                 // Tag set in XAML as "0".."6"
-                if (btn.Tag is string s && int.TryParse(s, out var idx))
+                if (btn.Tag is string s && int.TryParse(s, out int idx))
                 {
                     selectedColorIndex = idx;
                 }
@@ -163,8 +215,8 @@ namespace LifeCommits.Views
                 // Visual feedback: highlight selected button border and clear others
                 for (int i = 0; i <= 6; i++)
                 {
-                    var name = $"ColorBtn{i}";
-                    var b = this.FindControl<Button>(name);
+                    string name = $"ColorBtn{i}";
+                    Button b = this.FindControl<Button>(name);
                     if (b == null) continue;
 
                     if (i == selectedColorIndex)
@@ -185,18 +237,18 @@ namespace LifeCommits.Views
 
         private void ConfirmNewContribution_Click(object sender, RoutedEventArgs e)
         {
-            var tb = this.FindControl<TextBox>("ContributeTextBox");
-            var notes = tb?.Text?.Trim();
+            TextBox tb = this.FindControl<TextBox>("ContributeTextBox");
+            string notes = tb?.Text?.Trim();
 
             if (DataContext is MainWindowViewModel viewModel)
             {
-                //no notes contributions should be ok-- notes shouodl be optional
+                //no notes contributions should be ok-- notes should be optional
                 viewModel.MakeNewContribution(notes);
                 viewModel.IsContributePanelVisible = false;
             }
 
             //force grid redraw
-            var gridRenderer = this.FindControl<Control>("GridRenderer");
+            Control gridRenderer = this.FindControl<Control>("GridRenderer");
             gridRenderer?.InvalidateVisual();
 
             if (tb != null)
@@ -206,8 +258,8 @@ namespace LifeCommits.Views
         }
         private void ConfirmNewGoal_Click(object? sender, RoutedEventArgs e)
         {
-            var tb = this.FindControl<TextBox>("NewGoalTextBox");
-            var name = tb?.Text?.Trim();
+            TextBox tb = this.FindControl<TextBox>("NewGoalTextBox");
+            string name = tb?.Text?.Trim();
             if (string.IsNullOrEmpty(name))
             {
                 return;
@@ -229,12 +281,17 @@ namespace LifeCommits.Views
         private void TrySetWindowToBottom()
         {
             if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
                 return;
+            }
 
-            var impl = this.PlatformImpl;
-            var platformHandle = impl?.TryGetFeature(typeof(IPlatformHandle)) as IPlatformHandle;
-            var handle = platformHandle?.Handle ?? IntPtr.Zero;
-            if (handle == IntPtr.Zero) return;
+            IWindowImpl impl = this.PlatformImpl;
+            IPlatformHandle platformHandle = impl?.TryGetFeature(typeof(IPlatformHandle)) as IPlatformHandle;
+            IntPtr handle = platformHandle?.Handle ?? IntPtr.Zero;
+            if (handle == IntPtr.Zero)
+            {
+                return;
+            }
 
             SetWindowPos(handle, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         }

@@ -69,6 +69,15 @@
                        Foreground="White" />
         </Border>
 
+        <!-- messages popup (shown when a square is clicked) -->
+        <Border x:Name="MessagesPopup" Width="220" Height="120" IsVisible="False"
+                Canvas.Left="0" Canvas.Top="0"
+                Background="#75000000" CornerRadius="6" ClipToBounds="True">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="MessagesPanel" Margin="6" />
+            </ScrollViewer>
+        </Border>
+
         <!--Togglable Contribution panel-->
         <Border Background="#75000000" CornerRadius="10" ClipToBounds="True"
                 Width="150" Height="130" Canvas.Right="190" Canvas.Top="0"

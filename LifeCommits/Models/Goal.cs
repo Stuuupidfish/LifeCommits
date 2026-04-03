@@ -29,6 +29,7 @@ namespace LifeCommits.Models
         private int currentYearInd; //index of the current year in the years list
         private int maxStreak;
         private int currentStreak;
+        private int colorIndex = 3; // default to Green
         public Goal(String name, String color)
         {
             this.name = name;
@@ -43,8 +44,14 @@ namespace LifeCommits.Models
             yearsList = new List<String>();
 
             yearsList.Add(DateTime.Now.Year.ToString());
-            var grid = new Grid();
-            grid.ColorKey = ColorNameToIndex(color);
+            int idx = ColorNameToIndex(color);
+            if (idx < 0)
+            {
+                idx = 3;
+            }
+            colorIndex = idx;
+            Grid grid = new Grid();
+            grid.ColorKey = colorIndex;
             years.Add(grid);
         }
 
@@ -90,7 +97,9 @@ namespace LifeCommits.Models
         {
             int newYear = DateTime.Now.Year;
             yearsList.Add(newYear.ToString());
-            years.Add(new Grid());
+            Grid g = new Grid();
+            g.ColorKey = colorIndex;
+            years.Add(g);
             currentYearInd++;
         }
 

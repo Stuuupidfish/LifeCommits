@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using LifeCommits.Models;
 using Grid = LifeCommits.Models.Grid;
@@ -34,6 +35,18 @@ namespace LifeCommits.Views
 
         private readonly List<int>[] colors = new List<int>[7];
 
+        // hover state
+        private int hoveredRow = -1;
+        private int hoveredCol = -1;
+        private bool isHovering = false;
+        private Point lastPointerPos = new Point();
+
+        // square drawing metrics exposed so pointer logic and Render use same values
+        private double squareSize = 12.0;    // Size of the square
+        private double spacing = 3.0;  // Padding between squares
+
+        // (hover state and drawing metrics declared above)
+
         public GridRenderer()
         {
             //ROY G BIV
@@ -46,30 +59,81 @@ namespace LifeCommits.Views
             colors[6] = new List<int> { 0xF5C2F5, 0xE667E6, 0xDB24DB, 0x8C178C };
         }
 
+        protected override void OnPointerMoved(PointerEventArgs e)
+        {
+            base.OnPointerMoved(e);
+            Point p = e.GetPosition(this);
+            lastPointerPos = p;
+
+            int col = (int)(p.X / (squareSize + spacing));
+            int row = (int)(p.Y / (squareSize + spacing));
+
+            if (GridToDraw == null)
+                return;
+
+            if (col >= 0 && col < 53 && row >= 0 && row < 7)
+            {
+                double xOffset = col * (squareSize + spacing);
+                double yOffset = row * (squareSize + spacing);
+                if (p.X >= xOffset && p.X <= xOffset + squareSize && p.Y >= yOffset && p.Y <= yOffset + squareSize)
+                {
+                    hoveredCol = col;
+                    hoveredRow = row;
+                    isHovering = true;
+
+                    Square square = GridToDraw.Squares[row, col];
+                    if (square != null && square.Date != null)
+                    {
+                        DateOnly date = square.Date.Value;
+                        int commits = square.Commits ?? 0;
+                        string tip = DateOnlyToString(date) + ": " + commits.ToString() + (commits == 1 ? " commit" : " commits");
+                        ToolTip.SetTip(this, tip);
+                    }
+                    else
+                    {
+                        ToolTip.SetTip(this, null);
+                    }
+
+                    InvalidateVisual();
+                    return;
+                }
+            }
+
+            // if here, not over square
+            if (isHovering)
+            {
+                isHovering = false;
+                hoveredCol = -1;
+                hoveredRow = -1;
+                ToolTip.SetTip(this, null);
+                InvalidateVisual();
+            }
+        }
+
+        // Note: we do not override OnPointerLeave because Control does not provide that override
+        // Hover state is cleared when pointer moves outside squares in OnPointerMoved.
+
         public override void Render(DrawingContext context)
         {
             base.Render(context);
 
             if (GridToDraw == null) return;
 
-            double size = 12;
-            double spacing = 3;
-
             // Determine color palette index
             int paletteIdx = GridToDraw.ColorKey;
             if (paletteIdx < 0 || paletteIdx >= colors.Length)
                 paletteIdx = 3; // fallback to green
-            var palette = colors[paletteIdx];
+            List<int> palette = colors[paletteIdx];
 
             for (int c = 0; c < 53; c++)
             {
                 for (int r = 0; r < 7; r++)
                 {
-                    double xOffset = c * (size + spacing);
-                    double yOffset = r * (size + spacing);
+                    double xOffset = c * (squareSize + spacing);
+                    double yOffset = r * (squareSize + spacing);
 
-                    var rect = new Rect(xOffset, yOffset, size, size);
-                    var square = GridToDraw.Squares[r, c];
+                    Rect rect = new Rect(xOffset, yOffset, squareSize, squareSize);
+                    Square square = GridToDraw.Squares[r, c];
 
                     IBrush color;
 
@@ -98,6 +162,73 @@ namespace LifeCommits.Views
                     context.DrawRectangle(color, null, rect);
                 }
             }
+
+            // draw hover border
+            if (isHovering && hoveredRow >= 0 && hoveredCol >= 0)
+            {
+                double xOffset = hoveredCol * (squareSize + spacing);
+                double yOffset = hoveredRow * (squareSize + spacing);
+                Rect rect = new Rect(xOffset - 1, yOffset - 1, squareSize + 2, squareSize + 2);
+                Pen pen = new Pen(Brushes.White, 2);
+                context.DrawRectangle(null, pen, rect);
+            }
+        }
+
+        // small helper to format a DateOnly consistently
+        private string DateOnlyToString(DateOnly d)
+        {
+            return d.Year.ToString("D4") + "-" + d.Month.ToString("D2") + "-" + d.Day.ToString("D2");
+        }
+
+        // messages shown after clicking a square
+        // Event to notify parent when a square is clicked (messages and position)
+        public class SquareClickedEventArgs : EventArgs
+        {
+            public IReadOnlyList<string> Messages { get; }
+            public Point Position { get; }
+
+            public SquareClickedEventArgs(IReadOnlyList<string> messages, Point position)
+            {
+                Messages = messages;
+                Position = position;
+            }
+        }
+
+        public event EventHandler<SquareClickedEventArgs> SquareClicked;
+
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
+        {
+            base.OnPointerPressed(e);
+            Point p = e.GetPosition(this);
+
+            int col = (int)(p.X / (squareSize + spacing));
+            int row = (int)(p.Y / (squareSize + spacing));
+
+            if (GridToDraw == null)
+            {
+                return;
+            }
+
+            if (col >= 0 && col < 53 && row >= 0 && row < 7)
+            {
+                double xOffset = col * (squareSize + spacing);
+                double yOffset = row * (squareSize + spacing);
+                if (p.X >= xOffset && p.X <= xOffset + squareSize && p.Y >= yOffset && p.Y <= yOffset + squareSize)
+                {
+                    Square square = GridToDraw.Squares[row, col];
+                    if (square != null && square.CommitMessageList != null && square.CommitMessageList.Count > 0)
+                    {
+                        IReadOnlyList<string> msgs = square.CommitMessageList.AsReadOnly();
+                        SquareClickedEventArgs args = new SquareClickedEventArgs(msgs, p);
+                        SquareClicked?.Invoke(this, args);
+                        return;
+                    }
+                }
+            }
+
+            // clicked outside a square or no messages: notify host to hide any panel
+            SquareClickedEventArgs hideArgs = new SquareClickedEventArgs(new List<string>().AsReadOnly(), p);
+            SquareClicked?.Invoke(this, hideArgs);
         }
     }
 }

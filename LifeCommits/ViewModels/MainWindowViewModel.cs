@@ -245,7 +245,7 @@ namespace LifeCommits.ViewModels
 
         private void CheckIfNewDay(object? sender, EventArgs e)
         {
-            var actualToday = DateOnly.FromDateTime(DateTime.Now);
+            DateOnly actualToday = DateOnly.FromDateTime(DateTime.Now);
             
             //did midnight pass?
             if (actualToday > currentDate)
@@ -261,9 +261,9 @@ namespace LifeCommits.ViewModels
                 //update overview grid's today square
                 AppManager.OverviewGrid.InitializeTodaysSquare(currentDate);
                 //update all goal's today square
-                foreach (var goal in AppManager.Goals)
+                foreach (Goal goal in AppManager.Goals)
                 {
-                    var thisYearGrid = goal.GetYearGrid(currentDate.Year.ToString());
+                    Grid thisYearGrid = goal.GetYearGrid(currentDate.Year.ToString());
                     thisYearGrid.InitializeTodaysSquare(currentDate);
                 }
         
@@ -291,27 +291,52 @@ namespace LifeCommits.ViewModels
 
         public void MakeNewContribution(string contributionNotes)
         {
+            // Only allow contribution when a goal (not overview) is selected.
+            if (currentGoalIndex < 0 || currentGoalIndex >= AppManager.Goals.Count)
+            {
+                return;
+            }
+
             Goal goal = AppManager.Goals[currentGoalIndex];
             goal.Contribute(contributionNotes);
-            // Update overview grid for today
+
+            // Update overview grid for today so the overview reflects contributions across goals.
             AppManager.OverviewGrid.UpdateToday(DateOnly.FromDateTime(DateTime.Now));
-            OnPropertyChanged(nameof(SelectedGrid));
+
+            // Refresh the selected grid (either the goal's grid or the overview)
+            if (currentGoalIndex == -1)
+            {
+                SelectedGrid = AppManager.OverviewGrid;
+            }
+            else
+            {
+                SelectedGrid = goal.GetYearGrid(SelectedYear.ToString());
+            }
+
+            // Notify UI that manager/overview may have changed
             OnPropertyChanged(nameof(AppManager));
-            OnPropertyChanged(nameof(AppManager.OverviewGrid));
+            OnPropertyChanged(nameof(Years));
         }
 
         private void UpdateSelectedGridForYear(int year)
         {
+            // If no goals exist, show overview
             if (AppManager.Goals.Count == 0)
             {
-                SelectedGrid = null;
+                SelectedGrid = AppManager.OverviewGrid;
                 return;
             }
 
-            // Example: pick the first goal for now
-            var goal = AppManager.Goals[0];
+            // If overview is selected, update overview grid for year
+            if (currentGoalIndex == -1)
+            {
+                AppManager.ResetOverviewGridForYear(year);
+                SelectedGrid = AppManager.OverviewGrid;
+                return;
+            }
 
-            // Goal exposes GetYearGrid(string)
+            // Otherwise show the selected goal's grid for the year
+            Goal goal = AppManager.Goals[currentGoalIndex];
             SelectedGrid = goal.GetYearGrid(year.ToString());
         }
     }
