@@ -13,6 +13,9 @@ namespace LifeCommits.Views
 {
     public partial class MainWindow : Window
     {
+        // remember the last date key for the currently shown messages popup (for toggle)
+        private string? lastMessagesDateKey = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -39,9 +42,19 @@ namespace LifeCommits.Views
             // clear existing
             panel.Children.Clear();
 
+            // if clicked outside or no messages, hide popup and clear last key
             if (e.Messages == null || e.Messages.Count == 0)
             {
                 popup.IsVisible = false;
+                lastMessagesDateKey = null;
+                return;
+            }
+
+            // if popup already visible and the same date was clicked, toggle it closed
+            if (popup.IsVisible && e.DateKey != null && lastMessagesDateKey != null && e.DateKey == lastMessagesDateKey)
+            {
+                popup.IsVisible = false;
+                lastMessagesDateKey = null;
                 return;
             }
 
@@ -55,23 +68,97 @@ namespace LifeCommits.Views
                 panel.Children.Add(tb);
             }
 
-            double x = e.Position.X + 10.0;
-            double y = e.Position.Y + 10.0;
-            // clamp to window
-            double maxX = this.Bounds.Width - popup.Width - 4.0;
-            double maxY = this.Bounds.Height - popup.Height - 4.0;
-            if (x > maxX)
+            // determine mouse position relative to the window (translate from renderer coords)
+            Point winPoint = new Point(e.Position.X, e.Position.Y);
+            if (sender is Control srcControl)
             {
-                x = Math.Max(0.0, maxX);
-            }
-            if (y > maxY)
-            {
-                y = Math.Max(0.0, maxY);
+                // translate the click point into the Canvas coordinate space (the Window.Content is the Canvas)
+                Canvas? canvas = this.Content as Canvas;
+                Point? translated;
+                if (canvas != null)
+                {
+                    translated = srcControl.TranslatePoint(e.Position, canvas);
+                }
+                else
+                {
+                    translated = srcControl.TranslatePoint(e.Position, this);
+                }
+
+                if (translated.HasValue)
+                {
+                    winPoint = translated.Value;
+                }
             }
 
-            Canvas.SetLeft(popup, x);
-            Canvas.SetTop(popup, y);
+            // measure popup content so sizing (auto) is taken into account
+            // Measure the inner panel first to get reliable content size
+            double availableContentWidth = double.PositiveInfinity;
+            if (!double.IsInfinity(popup.MaxWidth) && popup.MaxWidth > 0)
+            {
+                availableContentWidth = Math.Max(0.0, popup.MaxWidth - (popup.Padding.Left + popup.Padding.Right));
+            }
+            // ask the panel to measure itself with the available width and max height
+            panel.Measure(new Size(availableContentWidth, popup.MaxHeight));
+            double contentWidth = panel.DesiredSize.Width;
+            double contentHeight = panel.DesiredSize.Height;
+
+            double popupWidth = contentWidth + (popup.Padding.Left + popup.Padding.Right);
+            double popupHeight = contentHeight + (popup.Padding.Top + popup.Padding.Bottom);
+
+            // enforce min/max constraints defined on the popup
+            if (popupWidth < popup.MinWidth)
+            {
+                popupWidth = popup.MinWidth;
+            }
+            if (!double.IsInfinity(popup.MaxWidth) && popupWidth > popup.MaxWidth)
+            {
+                popupWidth = popup.MaxWidth;
+            }
+            if (!double.IsInfinity(popup.MaxHeight) && popupHeight > popup.MaxHeight)
+            {
+                popupHeight = popup.MaxHeight;
+            }
+
+            // position so the bottom-left corner of the popup is at the click point
+            double left = winPoint.X;
+            double top = winPoint.Y - popupHeight;
+
+            // clamp horizontally within window
+            double maxX = this.Bounds.Width - popupWidth - 4.0;
+            if (left > maxX)
+            {
+                left = Math.Max(0.0, maxX);
+            }
+            if (left < 0.0)
+            {
+                left = 0.0;
+            }
+
+            // if popup would go above the window, place it below the click point instead
+            if (top < 0.0)
+            {
+                top = winPoint.Y + 4.0;
+            }
+
+            // ensure popup doesn't run off the bottom
+            double maxY = this.Bounds.Height - popupHeight - 4.0;
+            if (top > maxY)
+            {
+                top = Math.Max(0.0, maxY);
+            }
+
+            Canvas.SetLeft(popup, left);
+            Canvas.SetTop(popup, top);
+            // bring the popup to front by reordering it as the last child of the Canvas
+            if (popup.Parent is Canvas parentCanvas)
+            {
+                parentCanvas.Children.Remove(popup);
+                parentCanvas.Children.Add(popup);
+            }
             popup.IsVisible = true;
+
+            // remember which date's messages are currently shown so clicking it again will close
+            lastMessagesDateKey = e.DateKey;
         }
 
         private void GoalPrev_Click(object? sender, RoutedEventArgs e)

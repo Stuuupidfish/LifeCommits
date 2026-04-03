@@ -68,13 +68,17 @@
                        FontWeight="Bold"
                        Foreground="White" />
         </Border>
-
+        
         <!-- messages popup (shown when a square is clicked) -->
-        <Border x:Name="MessagesPopup" Width="220" Height="120" IsVisible="False"
+        <Border x:Name="MessagesPopup" IsVisible="False"
                 Canvas.Left="0" Canvas.Top="0"
-                Background="#75000000" CornerRadius="6" ClipToBounds="True">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="MessagesPanel" Margin="6" />
+                MinWidth="180"
+                MaxWidth="320"
+                MaxHeight="300"
+                Padding="8"
+                Background="#85000000" CornerRadius="6" ClipToBounds="True">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="MessagesPanel" Margin="2" />
             </ScrollViewer>
         </Border>
 
@@ -84,7 +88,7 @@
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 IsVisible="{Binding IsContributePanelVisible}">
             <StackPanel Margin="10">
-				 <TextBlock Text="Notes:" 
+                 <TextBlock Text="Notes:" 
                            FontFamily="Monospace"
                            Foreground="White" 
                            FontWeight="Bold" 
@@ -106,7 +110,7 @@
                     VerticalContentAlignment="Center" 
                 />
             </StackPanel>
-			
+            
         </Border>
 
         <!-- Toggleable Goal Panel -->
@@ -190,10 +194,13 @@
                     VerticalContentAlignment="Center" 
                 />
 
-
               
             </StackPanel>
         </Border>
+        
+        
+        
+        
 		
 
         <!-- main panel-->

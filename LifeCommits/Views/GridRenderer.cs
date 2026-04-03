@@ -181,16 +181,19 @@ namespace LifeCommits.Views
         }
 
         // messages shown after clicking a square
-        // Event to notify parent when a square is clicked (messages and position)
+        // Event to notify parent when a square is clicked (messages, position and optional date key)
         public class SquareClickedEventArgs : EventArgs
         {
             public IReadOnlyList<string> Messages { get; }
             public Point Position { get; }
+            // A simple string key representing the date (e.g. "YYYY-MM-DD") for toggling
+            public string? DateKey { get; }
 
-            public SquareClickedEventArgs(IReadOnlyList<string> messages, Point position)
+            public SquareClickedEventArgs(IReadOnlyList<string> messages, Point position, string? dateKey = null)
             {
                 Messages = messages;
                 Position = position;
+                DateKey = dateKey;
             }
         }
 
@@ -219,7 +222,14 @@ namespace LifeCommits.Views
                     if (square != null && square.CommitMessageList != null && square.CommitMessageList.Count > 0)
                     {
                         IReadOnlyList<string> msgs = square.CommitMessageList.AsReadOnly();
-                        SquareClickedEventArgs args = new SquareClickedEventArgs(msgs, p);
+                        // include a simple date key so the host can toggle the popup for the same day
+                        string? dateKey = null;
+                        if (square.Date != null)
+                        {
+                            DateOnly d = square.Date.Value;
+                            dateKey = d.Year.ToString("D4") + "-" + d.Month.ToString("D2") + "-" + d.Day.ToString("D2");
+                        }
+                        SquareClickedEventArgs args = new SquareClickedEventArgs(msgs, p, dateKey);
                         SquareClicked?.Invoke(this, args);
                         return;
                     }
@@ -227,7 +237,8 @@ namespace LifeCommits.Views
             }
 
             // clicked outside a square or no messages: notify host to hide any panel
-            SquareClickedEventArgs hideArgs = new SquareClickedEventArgs(new List<string>().AsReadOnly(), p);
+            // clicked outside a square or no messages: notify host to hide any panel
+            SquareClickedEventArgs hideArgs = new SquareClickedEventArgs(new List<string>().AsReadOnly(), p, null);
             SquareClicked?.Invoke(this, hideArgs);
         }
     }
