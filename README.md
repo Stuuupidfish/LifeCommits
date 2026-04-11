@@ -5,6 +5,20 @@ It's completely local so there is no login needed and it saves onto your compute
 
 I realize the delete button shouldn't be so obscure and clickable and have no double checking but lowkey I'm not the most passionate about this project so maybe one day I'll fix it.
 
+## Features:
+- Adding and deleting goals
+- Custom colors for goal grids
+- Contributions with the option to add notes to your contribution
+- An overview grid that compounds contributions across all your goals into a singular grid
+
+## For those who want to use it:
+There is an executable file for Windows users in the releases section of the repo
+
+## Tech stack
+- C# / .NET
+- Avalonia
+- Github Copilot
+
 The way I built this project was initially by writing only the C# classes that defined the core functionality. And because I hate UI work and am unfamiliar with MVVM, I let Copilot help me get started on that. I ended up letting it do most of UX work along with JSON serialization and deserialization. 
 
 Maybe one day I'll take the time to thoroughly learn everything but to be honest this time i around I was more focused on the end product over the process cuz I needed something to motivate me to keep up good habits.
