@@ -7,14 +7,16 @@ namespace LifeCommits.Models
     public sealed class Manager
     {
         private List<Goal> goals;
-        public List<Goal> Goals 
-        { 
-            get { return goals; } 
+        public List<Goal> Goals
+        {
+            get { return goals; }
+            set { goals = value; }
         }
         private OverviewGrid overviewGrid;
-        public OverviewGrid OverviewGrid 
-        { 
-            get { return overviewGrid; } 
+        public OverviewGrid OverviewGrid
+        {
+            get { return overviewGrid; }
+            set { overviewGrid = value; }
         }
         
         public Manager()

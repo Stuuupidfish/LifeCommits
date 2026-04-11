@@ -10,26 +10,59 @@ namespace LifeCommits.Models
         //goals hold grids. one grid per year.
         //grids are 7 rows (sun-sat) and 53 columns (weeks in a year-- rounded accounting for leap year)
         private String color;
-        public String Color 
-        { 
-            get { return color; } 
+        public String Color
+        {
+            get { return color; }
+            set { color = value; }
         }
         private String name;
-        public String Name 
-        { 
-            get { return name; } 
+        public String Name
+        {
+            get { return name; }
+            set { name = value; }
         }
         private int commits;
-        public int Commits 
-        { 
-            get { return commits; } 
+        public int Commits
+        {
+            get { return commits; }
+            set { commits = value; }
         }
         private List<Grid> years;
         private List<String> yearsList; //years as strings for UI purposes
         private int currentYearInd; //index of the current year in the years list
+        // expose for serialization
+        public List<Grid> Years
+        {
+            get { return years; }
+            set { years = value ?? new List<Grid>(); }
+        }
+
+        public List<string> YearsList
+        {
+            get { return yearsList; }
+            set { yearsList = value ?? new List<string>(); }
+        }
+
+        public int CurrentYearIndex
+        {
+            get { return currentYearInd; }
+            set { currentYearInd = value; }
+        }
         private int maxStreak;
         private int currentStreak;
         private int colorIndex = 3; // default to Green
+        // parameterless ctor needed for deserialization
+        public Goal()
+        {
+            // initialize defaults in case deserializer sets only some members
+            maxStreak = 0;
+            currentStreak = 0;
+            commits = 0;
+            currentYearInd = 0;
+            years = new List<Grid>();
+            yearsList = new List<string>();
+        }
+
         public Goal(String name, String color)
         {
             this.name = name;
@@ -39,7 +72,6 @@ namespace LifeCommits.Models
             currentStreak = 0;
             commits = 0;
             currentYearInd = 0;
-
             years = new List<Grid>();
             yearsList = new List<String>();
 
@@ -82,14 +114,6 @@ namespace LifeCommits.Models
         {
             int yearInd = yearsList.IndexOf(year);
             return years[yearInd];
-        }
-
-        public IReadOnlyList<string> YearsList
-        {
-            get
-            {
-                return yearsList.AsReadOnly();
-            }
         }
 
         //call this at the start of year

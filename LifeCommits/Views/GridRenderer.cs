@@ -81,7 +81,7 @@ namespace LifeCommits.Views
                     hoveredRow = row;
                     isHovering = true;
 
-                    Square square = GridToDraw.Squares[row, col];
+                    Square square = GridToDraw.Squares[row][col];
                     if (square != null && square.Date != null)
                     {
                         DateOnly date = square.Date.Value;
@@ -133,7 +133,7 @@ namespace LifeCommits.Views
                     double yOffset = r * (squareSize + spacing);
 
                     Rect rect = new Rect(xOffset, yOffset, squareSize, squareSize);
-                    Square square = GridToDraw.Squares[r, c];
+                    Square square = GridToDraw.Squares[r][c];
 
                     IBrush color;
 
@@ -218,7 +218,7 @@ namespace LifeCommits.Views
                 double yOffset = row * (squareSize + spacing);
                 if (p.X >= xOffset && p.X <= xOffset + squareSize && p.Y >= yOffset && p.Y <= yOffset + squareSize)
                 {
-                    Square square = GridToDraw.Squares[row, col];
+                    Square square = GridToDraw.Squares[row][col];
                     if (square != null && square.CommitMessageList != null && square.CommitMessageList.Count > 0)
                     {
                         IReadOnlyList<string> msgs = square.CommitMessageList.AsReadOnly();

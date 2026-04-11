@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Media;
 using LifeCommits.ViewModels;
+using LifeCommits.Models; //YEAH I KNOW THIS BREAKS MVVM STRUCTURE BUT I CANT TAKE IT ANYMORE
 using System;
 using System.Linq;
 
@@ -361,6 +362,35 @@ namespace LifeCommits.Views
             if (tb != null)
             {
                 tb.Text = string.Empty;
+            }
+        }
+
+        private void DeleteGoal_Click(object? sender, RoutedEventArgs e)
+        {
+            Goal? target = null;
+
+            // Common patterns: the Button's DataContext can be the Goal, or a Tag/CommandParameter
+            if (sender is Button btn)
+            {
+                if (btn.DataContext is Goal g)
+                {
+                    target = g;
+                }
+            }
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                // if the button wasn't bound to a Goal, use the currently selected goal from VM
+                if (target == null)
+                {
+                    target = viewModel.SelectedGoal;
+                }
+
+                if (target == null)
+                {
+                    return;
+                }
+
+                viewModel.DeleteGoal(target);
             }
         }
 

@@ -18,10 +18,14 @@ namespace LifeCommits.Models
                 {
                     for (int c = 0; c < 53; c++)
                     {
-                        Square square = thisYear.Squares[r, c];
+                        Square square = thisYear.Squares[r][c];
                         if (square != null)
                         {
-                            squares[r, c].Commits += square.Commits;
+                            if (squares[r][c] == null)
+                            {
+                                squares[r][c] = new Square(square.Date, 0);
+                            }
+                            squares[r][c].Commits += square.Commits;
                         }
                     }
                 }

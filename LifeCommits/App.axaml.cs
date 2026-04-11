@@ -4,6 +4,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using LifeCommits.ViewModels;
+using LifeCommits.Services;
 using LifeCommits.Views;
 using System.Linq;
 
@@ -27,9 +28,23 @@ namespace LifeCommits
                 {
                     DataContext = new MainWindowViewModel(),
                 };
+
+                // save on exit
+                desktop.Exit += OnExit;
             }
 
             base.OnFrameworkInitializationCompleted();
+        }
+
+        private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+        {
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                if (desktop.MainWindow?.DataContext is MainWindowViewModel vm)
+                {
+                    PersistenceService.SaveManager(vm.AppManager);
+                }
+            }
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

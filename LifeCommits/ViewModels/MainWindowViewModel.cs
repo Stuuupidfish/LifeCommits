@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using LifeCommits.Models;
+using LifeCommits.Services;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace LifeCommits.ViewModels
     {
         //central "state" of the window
         //instantiates Manager once when the app starts
-        public Manager AppManager { get; }
+        public Manager AppManager { get; private set; }
 
 
         private Grid selectedGrid;
@@ -36,6 +37,25 @@ namespace LifeCommits.ViewModels
         // -1 indicates the overview is selected
         private int currentGoalIndex = -1;
 
+        // currently selected Goal (null when overview is selected)
+        public Goal? SelectedGoal
+        {
+            get
+            {
+                if (currentGoalIndex == -1)
+                {
+                    return null;
+                }
+
+                if (currentGoalIndex < 0 || currentGoalIndex >= AppManager.Goals.Count)
+                {
+                    return null;
+                }
+
+                return AppManager.Goals[currentGoalIndex];
+            }
+        }
+
         public void SelectGoalByIndex(int index)
         {
             if (index < -1)
@@ -49,6 +69,9 @@ namespace LifeCommits.ViewModels
             }
 
             currentGoalIndex = index;
+
+            // notify that selected goal reference changed
+            OnPropertyChanged(nameof(SelectedGoal));
 
             // Update contribute button visibility: only visible if not on overview
             IsContributeButtonVisible = (currentGoalIndex != -1);
@@ -231,7 +254,16 @@ namespace LifeCommits.ViewModels
 
         public MainWindowViewModel()
         {
-            AppManager = new Manager();
+            // try to load saved state; fall back to a new Manager
+            Manager? loaded = PersistenceService.LoadManager();
+            if (loaded != null)
+            {
+                AppManager = loaded;
+            }
+            else
+            {
+                AppManager = new Manager();
+            }
             // default selected grid is the overview for current year
             SelectedGrid = AppManager.OverviewGrid;
             currentDate = DateOnly.FromDateTime(DateTime.Now);
@@ -287,6 +319,23 @@ namespace LifeCommits.ViewModels
             // Ensure selected year is current and notify that Years may have changed.
             SelectedYear = DateTime.Now.Year;
             OnPropertyChanged(nameof(Years));
+            // persist change
+            PersistenceService.SaveManager(AppManager);
+        }
+        public void DeleteGoal(Goal target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            AppManager.DeleteGoal(target);
+
+            SelectGoalByIndex(-1); //go back to overview after deletion
+
+            OnPropertyChanged(nameof(Years));
+            // persist change
+            PersistenceService.SaveManager(AppManager);
         }
 
         public void MakeNewContribution(string contributionNotes)
@@ -316,6 +365,8 @@ namespace LifeCommits.ViewModels
             // Notify UI that manager/overview may have changed
             OnPropertyChanged(nameof(AppManager));
             OnPropertyChanged(nameof(Years));
+            // persist change
+            PersistenceService.SaveManager(AppManager);
         }
 
         private void UpdateSelectedGridForYear(int year)

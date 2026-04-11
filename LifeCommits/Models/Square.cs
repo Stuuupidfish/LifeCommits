@@ -6,35 +6,21 @@ namespace LifeCommits.Models
 {
     public class Square
     {
-        private DateOnly? date;
-        public DateOnly? Date
-        {
-            get { return date; }
-            set { date = value; }
-        }
-        private List<String> commitMessageList;
-        public List<String> CommitMessageList
-        {
-            get { return commitMessageList; }
-            set { commitMessageList = value; }
-        }
-        private int? commits;
-        public int? Commits
-        {
-            get { return commits; }
-            set { commits = value; }
-        }
+        public DateOnly? Date { get; set; }
+        public List<String> CommitMessageList { get; set; }
+        public int? Commits { get; set; }
+
         public Square(DateOnly? date, int? commits)
         {
-            this.date = date;
-            this.commits = commits;
+            Date = date;
+            Commits = commits;
             if (date == null || commits == null)
             {
-                commitMessageList = null;
+                CommitMessageList = null;
             }
             else
             {
-                commitMessageList = new List<String>();
+                CommitMessageList = new List<String>();
             }
         }
     }

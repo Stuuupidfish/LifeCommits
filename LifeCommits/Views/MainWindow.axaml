@@ -227,7 +227,24 @@
                            Margin="10,5,0,0" />
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5">
-                    <!--contribute-->
+                    <!--delete goal-->
+                    <Button 
+                        IsVisible="{Binding IsContributeButtonVisible}"
+                        Content="Delete Goal" 
+                        FontFamily="Monospace"
+                        FontWeight="Bold"
+                        Click="DeleteGoal_Click"
+                        Width="100" Height="20"
+                        Padding="0,-1,0,0"
+                        Margin="0,5,5,0"
+                        Background="#50FFFFFF"
+                        Foreground="#80000000"
+                        CornerRadius="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                    />
+                    
+                    <!--contribute" -->
                     <Button 
                         IsVisible="{Binding IsContributeButtonVisible}"
                         Content="Contribute" 
