@@ -3,7 +3,7 @@ I really like the green contribution squares in GitHub and Leetcode. They motiva
 It's completely local so there is no login needed and it saves onto your computer.
 <img width="877" height="284" alt="Screenshot 2026-04-10 230758" src="https://github.com/user-attachments/assets/ac10913d-0c2b-4e19-8e73-279cf3793084" />
 
-I realize the delete button shouldn't be so obscure and clickable and have no double checking but lowkey I'm not the most passionate about this project so maybe one day I'll fix it.
+I realize it's currently more like MVP as of now. The delete button is too obscure and clickable and has no double-checking, and I still need to implement streak counting, and the grid is somewhat broken when it comes to updating every day. Ill fix it one day...
 
 ## Features:
 - Adding and deleting goals
